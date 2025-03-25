@@ -29,7 +29,7 @@ A dynamic web application to showcase my cybersecurity homelab, providing intera
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/cybersecurity-homelab-portfolio.git
+   git clone https://github.com/CodisTech/cybersecurity-homelab-portfolio.git
    cd cybersecurity-homelab-portfolio
    ```
 
