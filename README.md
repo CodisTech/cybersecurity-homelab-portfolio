@@ -1,6 +1,8 @@
-# Cybersecurity Homelab Portfolio
+# Cybersecurity Homelab Portfolio - Web Application
 
-A dynamic cybersecurity homelab portfolio and learning platform that provides interactive, user-friendly documentation and tutorials for cybersecurity enthusiasts and professionals.
+This is the web application for the cybersecurity homelab portfolio. It provides a dynamic, interactive platform for viewing documentation, tutorials, and managing services for your cybersecurity homelab.
+
+> **Note**: This is the `web-application` branch which contains a full-featured React+Express web application for the cybersecurity homelab. The `main` branch contains the original documentation in markdown format.
 
 ## Features
 
@@ -27,10 +29,11 @@ A dynamic cybersecurity homelab portfolio and learning platform that provides in
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository and checkout the web-application branch
    ```bash
-   git clone https://github.com/yourusername/cybersecurity-homelab.git
+   git clone https://github.com/CodisTech/cybersecurity-homelab.git
    cd cybersecurity-homelab
+   git checkout web-application
    ```
 
 2. Install dependencies
