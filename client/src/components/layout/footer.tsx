@@ -32,10 +32,10 @@ const Footer = () => {
           </div>
           <div className="mt-4 md:mt-0">
             <Link href="/privacy">
-              <a className="text-sm text-text-secondary hover:text-white mr-4">Privacy Policy</a>
+              <div className="text-sm text-text-secondary hover:text-white mr-4 inline-block cursor-pointer">Privacy Policy</div>
             </Link>
             <Link href="/terms">
-              <a className="text-sm text-text-secondary hover:text-white">Terms of Use</a>
+              <div className="text-sm text-text-secondary hover:text-white inline-block cursor-pointer">Terms of Use</div>
             </Link>
           </div>
         </div>

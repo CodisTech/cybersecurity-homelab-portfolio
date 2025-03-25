@@ -162,7 +162,7 @@ const Home = () => {
         <div className="mt-6 text-center">
           <Link href="/services">
             <Button variant="outline" className="px-4 py-2">
-              View All Services ({isLoadingServices ? '...' : services?.length})
+              View All Services ({isLoadingServices ? '...' : Array.isArray(services) ? services.length : 0})
             </Button>
           </Link>
         </div>
@@ -174,13 +174,19 @@ const Home = () => {
         {isLoadingTutorials ? (
           <Card className="bg-surface rounded-lg shadow-lg overflow-hidden border border-gray-800 h-96 animate-pulse" />
         ) : (
-          featuredTutorials?.map((tutorial: Tutorial) => (
-            <div key={tutorial.id}>
-              <Link href={`/tutorials/${tutorial.slug}`}>
-                <TutorialCard tutorial={tutorial} featured={true} />
-              </Link>
-            </div>
-          ))
+          Array.isArray(featuredTutorials) && featuredTutorials.length > 0 ? (
+            featuredTutorials.map((tutorial: Tutorial) => (
+              <div key={tutorial.id}>
+                <Link href={`/tutorials/${tutorial.slug}`}>
+                  <TutorialCard tutorial={tutorial} featured={true} />
+                </Link>
+              </div>
+            ))
+          ) : (
+            <Card className="bg-surface rounded-lg shadow-lg overflow-hidden border border-gray-800 p-4">
+              <p className="text-center text-gray-400">No featured tutorials available</p>
+            </Card>
+          )
         )}
       </section>
     </>
