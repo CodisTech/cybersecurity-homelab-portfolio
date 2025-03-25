@@ -120,20 +120,63 @@ const Documentation = () => {
             <div className="prose prose-invert max-w-none">
               <h2 className="text-2xl font-bold text-text-primary mb-4">{activeDocument.title}</h2>
               <div className="markdown-content">
-                {activeDocument.content.split('\n').map((line, index) => {
-                  if (line.startsWith('# ')) {
-                    return <h1 key={index} className="text-2xl font-bold mt-6 mb-4">{line.substring(2)}</h1>;
-                  } else if (line.startsWith('## ')) {
-                    return <h2 key={index} className="text-xl font-bold mt-5 mb-3">{line.substring(3)}</h2>;
-                  } else if (line.startsWith('### ')) {
-                    return <h3 key={index} className="text-lg font-bold mt-4 mb-2">{line.substring(4)}</h3>;
-                  } else if (line.startsWith('```')) {
-                    // Code block handling would be more complex in real implementation
-                    return <Code key={index} language="bash" code="# Sample code block" />;
-                  } else {
-                    return <p key={index} className="my-2">{line}</p>;
+                {(() => {
+                  const content = activeDocument.content.split('\n');
+                  const result = [];
+                  let inCodeBlock = false;
+                  let codeContent = '';
+                  let codeLanguage = 'bash';
+                  
+                  for (let i = 0; i < content.length; i++) {
+                    const line = content[i];
+                    
+                    // Handle code blocks
+                    if (line.startsWith('```')) {
+                      if (!inCodeBlock) {
+                        // Start of code block
+                        inCodeBlock = true;
+                        codeLanguage = line.substring(3).trim() || 'bash';
+                        codeContent = '';
+                      } else {
+                        // End of code block
+                        inCodeBlock = false;
+                        result.push(
+                          <Code key={`code-${i}`} language={codeLanguage} code={codeContent.trim()} />
+                        );
+                      }
+                      continue;
+                    }
+                    
+                    if (inCodeBlock) {
+                      codeContent += line + '\n';
+                      continue;
+                    }
+                    
+                    // Handle headers and regular text
+                    if (line.startsWith('# ')) {
+                      result.push(<h1 key={i} className="text-2xl font-bold mt-6 mb-4">{line.substring(2)}</h1>);
+                    } else if (line.startsWith('## ')) {
+                      result.push(<h2 key={i} className="text-xl font-bold mt-5 mb-3">{line.substring(3)}</h2>);
+                    } else if (line.startsWith('### ')) {
+                      result.push(<h3 key={i} className="text-lg font-bold mt-4 mb-2">{line.substring(4)}</h3>);
+                    } else if (line.startsWith('- ')) {
+                      // Handle list items
+                      result.push(<li key={i} className="ml-4">{line.substring(2)}</li>);
+                    } else if (line.match(/^\d+\. /)) {
+                      // Handle numbered list items
+                      const textContent = line.replace(/^\d+\. /, '');
+                      result.push(<li key={i} className="ml-4 list-decimal">{textContent}</li>);
+                    } else if (line.trim() === '') {
+                      // Handle empty lines
+                      result.push(<div key={i} className="h-2"></div>);
+                    } else {
+                      // Handle regular paragraphs
+                      result.push(<p key={i} className="my-2">{line}</p>);
+                    }
                   }
-                })}
+                  
+                  return result;
+                })()}
               </div>
             </div>
           </div>
