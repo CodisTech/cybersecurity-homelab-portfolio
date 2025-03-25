@@ -11,7 +11,7 @@ import { Tutorial } from "@shared/schema";
 const TutorialDetail = () => {
   const [match, params] = useRoute<{ slug: string }>("/tutorials/:slug");
   
-  const { data: tutorial, isLoading, error } = useQuery({
+  const { data: tutorial, isLoading, error } = useQuery<Tutorial>({
     queryKey: [`/api/tutorials/slug/${params?.slug}`],
     enabled: !!params?.slug,
   });
@@ -75,9 +75,10 @@ const TutorialDetail = () => {
             {tutorial.featured === 1 && (
               <Badge className="bg-primary bg-opacity-20 text-primary">Featured</Badge>
             )}
-            {tutorial.tags?.map((tag, index) => (
-              <Badge key={index} variant="outline">{tag}</Badge>
-            ))}
+            {tutorial.tags && Array.isArray(tutorial.tags) && 
+              tutorial.tags.map((tag: string, index: number) => (
+                <Badge key={index} variant="outline">{tag}</Badge>
+              ))}
           </div>
           
           <h1 className="text-3xl font-bold text-text-primary mb-4">{tutorial.title}</h1>
@@ -98,13 +99,13 @@ const TutorialDetail = () => {
           <p className="text-lg text-text-secondary">{tutorial.summary}</p>
         </header>
         
-        {tutorial.prerequisites && tutorial.prerequisites.length > 0 && (
+        {tutorial.prerequisites && Array.isArray(tutorial.prerequisites) && tutorial.prerequisites.length > 0 && (
           <section className="mb-8">
             <Card className="bg-background border border-gray-800">
               <CardContent className="p-6">
                 <h2 className="text-xl font-bold mb-4">Prerequisites</h2>
                 <ul className="list-disc pl-5 space-y-2">
-                  {tutorial.prerequisites.map((prerequisite, index) => (
+                  {tutorial.prerequisites.map((prerequisite: string, index: number) => (
                     <li key={index}>{prerequisite}</li>
                   ))}
                 </ul>
@@ -115,7 +116,7 @@ const TutorialDetail = () => {
         
         <section className="tutorial-content mb-8">
           {/* This is a simplified markdown rendering */}
-          {tutorial.content.split('\n').map((line, index) => {
+          {tutorial.content.split('\n').map((line: string, index: number) => {
             if (line.startsWith('# ')) {
               return <h1 key={index} className="text-3xl font-bold mt-8 mb-4">{line.substring(2)}</h1>;
             } else if (line.startsWith('## ')) {
@@ -128,10 +129,10 @@ const TutorialDetail = () => {
           })}
         </section>
         
-        {tutorial.codeSnippets && tutorial.codeSnippets.length > 0 && (
+        {tutorial.codeSnippets && Array.isArray(tutorial.codeSnippets) && tutorial.codeSnippets.length > 0 && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Code Examples</h2>
-            {tutorial.codeSnippets.map((snippet, index) => (
+            {tutorial.codeSnippets.map((snippet: { language: string, code: string }, index: number) => (
               <div key={index} className="mb-6">
                 <Code language={snippet.language} code={snippet.code} />
               </div>

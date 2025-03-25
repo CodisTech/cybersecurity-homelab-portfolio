@@ -177,9 +177,7 @@ const Home = () => {
           Array.isArray(featuredTutorials) && featuredTutorials.length > 0 ? (
             featuredTutorials.map((tutorial: Tutorial) => (
               <div key={tutorial.id}>
-                <Link href={`/tutorials/${tutorial.slug}`}>
-                  <TutorialCard tutorial={tutorial} featured={true} />
-                </Link>
+                <TutorialCard tutorial={tutorial} featured={true} />
               </div>
             ))
           ) : (

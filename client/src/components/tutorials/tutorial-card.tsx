@@ -4,6 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tutorial } from "@shared/schema";
 
+// Define the expected types for prerequisites and codeSnippets
+type CodeSnippet = {
+  language: string;
+  code: string;
+};
+
 interface TutorialCardProps {
   tutorial: Tutorial;
   featured?: boolean;
@@ -32,22 +38,22 @@ const TutorialCard = ({ tutorial, featured = false }: TutorialCardProps) => {
           
           <p className="text-text-secondary mb-4">{summary}</p>
           
-          {prerequisites && prerequisites.length > 0 && (
+          {prerequisites && Array.isArray(prerequisites) && prerequisites.length > 0 && (
             <div className="bg-background rounded p-4 mb-4">
               <h4 className="text-md font-medium text-text-primary mb-2">Prerequisites</h4>
               <ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
-                {prerequisites.map((prerequisite, index) => (
+                {prerequisites.map((prerequisite: string, index: number) => (
                   <li key={index}>{prerequisite}</li>
                 ))}
               </ul>
             </div>
           )}
           
-          {codeSnippets && codeSnippets.length > 0 && (
+          {codeSnippets && Array.isArray(codeSnippets) && codeSnippets.length > 0 && (
             <>
               <h4 className="text-md font-medium text-text-primary mb-2">Code Snippet Example:</h4>
               <div className="code-block mb-4 font-mono text-sm bg-[#1e242c] rounded-md p-4 overflow-x-auto">
-                <pre><code className={`language-${codeSnippets[0].language}`}>{codeSnippets[0].code}</code></pre>
+                <pre><code className={`language-${(codeSnippets[0] as CodeSnippet).language}`}>{(codeSnippets[0] as CodeSnippet).code}</code></pre>
               </div>
             </>
           )}
