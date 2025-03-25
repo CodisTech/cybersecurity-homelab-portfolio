@@ -147,9 +147,15 @@ const Home = () => {
               <Card className="bg-surface rounded-lg shadow-lg overflow-hidden border border-gray-800 h-64 animate-pulse" />
             </>
           ) : (
-            services?.map((service: Service) => (
-              <ServiceCard key={service.id} service={service} />
-            ))
+            Array.isArray(services) && services.length > 0 ? (
+              services.map((service: Service) => (
+                <ServiceCard key={service.id} service={service} />
+              ))
+            ) : (
+              <Card className="bg-surface rounded-lg shadow-lg overflow-hidden border border-gray-800 p-4">
+                <p className="text-center text-gray-400">No services available</p>
+              </Card>
+            )
           )}
         </div>
 

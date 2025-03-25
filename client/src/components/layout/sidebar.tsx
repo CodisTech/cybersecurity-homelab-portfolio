@@ -25,28 +25,28 @@ const Sidebar = () => {
             <h3 className="font-medium text-sm text-text-secondary uppercase tracking-wider">Main</h3>
             <div className="mt-2 space-y-1">
               <Link href="/">
-                <a className={getLinkClass("/")}>
+                <div className={getLinkClass("/")}>
                   <i className="fas fa-home w-5 h-5 mr-2"></i>
                   Overview
-                </a>
+                </div>
               </Link>
               <Link href="/documentation">
-                <a className={getLinkClass("/documentation")}>
+                <div className={getLinkClass("/documentation")}>
                   <i className="fas fa-book w-5 h-5 mr-2"></i>
                   Documentation
-                </a>
+                </div>
               </Link>
               <Link href="/services">
-                <a className={getLinkClass("/services")}>
+                <div className={getLinkClass("/services")}>
                   <i className="fas fa-layer-group w-5 h-5 mr-2"></i>
                   Services
-                </a>
+                </div>
               </Link>
               <Link href="/tutorials">
-                <a className={getLinkClass("/tutorials")}>
+                <div className={getLinkClass("/tutorials")}>
                   <i className="fas fa-graduation-cap w-5 h-5 mr-2"></i>
                   Tutorials
-                </a>
+                </div>
               </Link>
             </div>
           </div>

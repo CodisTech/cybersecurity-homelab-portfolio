@@ -16,10 +16,10 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
       <ol className="inline-flex items-center space-x-1 md:space-x-3">
         <li className="inline-flex items-center">
           <Link href="/">
-            <a className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white">
+            <div className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white cursor-pointer">
               <i className="fas fa-home mr-2"></i>
               Home
-            </a>
+            </div>
           </Link>
         </li>
         
@@ -31,9 +31,9 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
                 <span className="text-sm font-medium text-primary">{item.label}</span>
               ) : (
                 <Link href={item.href}>
-                  <a className="text-sm font-medium text-gray-400 hover:text-white">
+                  <div className="text-sm font-medium text-gray-400 hover:text-white cursor-pointer">
                     {item.label}
-                  </a>
+                  </div>
                 </Link>
               )}
             </div>
