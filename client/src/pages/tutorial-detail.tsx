@@ -145,9 +145,10 @@ const TutorialDetail = () => {
             <div className="text-text-secondary">
               <h3 className="text-lg font-medium mb-2">Related Topics</h3>
               <div className="flex flex-wrap gap-2">
-                {tutorial.tags?.map((tag, index) => (
-                  <Badge key={index} variant="outline" className="cursor-pointer">{tag}</Badge>
-                ))}
+                {tutorial.tags && Array.isArray(tutorial.tags) && 
+                  tutorial.tags.map((tag: string, index: number) => (
+                    <Badge key={index} variant="outline" className="cursor-pointer">{tag}</Badge>
+                  ))}
               </div>
             </div>
             
