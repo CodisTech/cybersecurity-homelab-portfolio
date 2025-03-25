@@ -310,7 +310,15 @@ export class MemStorage implements IStorage {
   
   async createService(service: InsertService): Promise<Service> {
     const id = this.currentServiceId++;
-    const newService: Service = { ...service, id };
+    const newService: Service = { 
+      ...service, 
+      id,
+      version: service.version || null,
+      ipAddress: service.ipAddress || null,
+      platform: service.platform || null,
+      configLink: service.configLink || null,
+      adminLink: service.adminLink || null
+    };
     this.services.set(id, newService);
     return newService;
   }
