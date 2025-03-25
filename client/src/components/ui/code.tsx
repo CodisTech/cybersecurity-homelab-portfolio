@@ -1,5 +1,17 @@
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef } from "react";
+import Prism from "prismjs";
+import "prismjs/themes/prism-tomorrow.css";
+import "prismjs/components/prism-bash";
+import "prismjs/components/prism-javascript";
+import "prismjs/components/prism-typescript";
+import "prismjs/components/prism-python";
+import "prismjs/components/prism-yaml";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-markup";
+import "prismjs/components/prism-css";
+import "prismjs/plugins/line-numbers/prism-line-numbers";
+import "prismjs/plugins/line-numbers/prism-line-numbers.css";
 
 interface CodeProps {
   code: string;
@@ -11,23 +23,9 @@ const Code: React.FC<CodeProps> = ({ code, language, className }) => {
   const codeRef = useRef<HTMLPreElement>(null);
 
   useEffect(() => {
-    // Load Prism.js dynamically
-    const loadPrism = async () => {
-      const Prism = await import("https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js");
-      await import(`https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-${language}.min.js`);
-      
-      // Add line numbers plugin
-      await import("https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js");
-      
-      // Add copy button plugin
-      await import("https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js");
-      
-      if (codeRef.current) {
-        Prism.highlightElement(codeRef.current);
-      }
-    };
-
-    loadPrism();
+    if (codeRef.current) {
+      Prism.highlightElement(codeRef.current);
+    }
   }, [code, language]);
 
   return (

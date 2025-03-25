@@ -60,9 +60,9 @@ const TutorialCard = ({ tutorial, featured = false }: TutorialCardProps) => {
             </div>
             
             <Link href={`/tutorials/${slug}`}>
-              <a className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+              <div className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer">
                 Read Tutorial <i className="fas fa-arrow-right ml-1"></i>
-              </a>
+              </div>
             </Link>
           </div>
         </CardContent>
@@ -79,9 +79,9 @@ const TutorialCard = ({ tutorial, featured = false }: TutorialCardProps) => {
           <i className="fas fa-calendar-alt mr-1"></i> {formatDate(createdAt)}
         </div>
         <Link href={`/tutorials/${slug}`}>
-          <a className="text-xs text-primary hover:underline">
+          <div className="text-xs text-primary hover:underline cursor-pointer">
             Read more <i className="fas fa-arrow-right ml-1"></i>
-          </a>
+          </div>
         </Link>
       </div>
     </Card>

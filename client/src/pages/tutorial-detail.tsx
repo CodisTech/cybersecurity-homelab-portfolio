@@ -6,6 +6,7 @@ import { Code } from "@/components/ui/code";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Breadcrumb from "@/components/layout/breadcrumb";
+import { Tutorial } from "@shared/schema";
 
 const TutorialDetail = () => {
   const [match, params] = useRoute<{ slug: string }>("/tutorials/:slug");
