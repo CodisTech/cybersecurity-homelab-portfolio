@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, ReactNode } from "react";
 import { useRoute, Link } from "wouter";
 import { formatDate } from "@/lib/utils";
 import { Code } from "@/components/ui/code";
@@ -7,6 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Breadcrumb from "@/components/layout/breadcrumb";
 import { Tutorial } from "@shared/schema";
+
+// Define the types for CodeSnippet
+type CodeSnippet = {
+  language: string;
+  code: string;
+};
 
 const TutorialDetail = () => {
   const [match, params] = useRoute<{ slug: string }>("/tutorials/:slug");
@@ -27,6 +33,46 @@ const TutorialDetail = () => {
       document.head.removeChild(link);
     };
   }, []);
+
+  // Helper function to safely render prerequisites
+  const renderPrerequisites = (): ReactNode => {
+    if (!tutorial?.prerequisites || !Array.isArray(tutorial.prerequisites) || tutorial.prerequisites.length === 0) {
+      return null;
+    }
+
+    return (
+      <section className="mb-8">
+        <Card className="bg-background border border-gray-800">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-bold mb-4">Prerequisites</h2>
+            <ul className="list-disc pl-5 space-y-2">
+              {(tutorial.prerequisites as string[]).map((prerequisite: string, index: number) => (
+                <li key={index}>{prerequisite}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  };
+
+  // Helper function to safely render code snippets
+  const renderCodeSnippets = (): ReactNode => {
+    if (!tutorial?.codeSnippets || !Array.isArray(tutorial.codeSnippets) || tutorial.codeSnippets.length === 0) {
+      return null;
+    }
+
+    return (
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Code Examples</h2>
+        {(tutorial.codeSnippets as CodeSnippet[]).map((snippet: CodeSnippet, index: number) => (
+          <div key={index} className="mb-6">
+            <Code language={snippet.language} code={snippet.code} />
+          </div>
+        ))}
+      </section>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -99,20 +145,7 @@ const TutorialDetail = () => {
           <p className="text-lg text-text-secondary">{tutorial.summary}</p>
         </header>
         
-        {tutorial.prerequisites && Array.isArray(tutorial.prerequisites) && (tutorial.prerequisites as string[]).length > 0 && (
-          <section className="mb-8">
-            <Card className="bg-background border border-gray-800">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-bold mb-4">Prerequisites</h2>
-                <ul className="list-disc pl-5 space-y-2">
-                  {(tutorial.prerequisites as string[]).map((prerequisite: string, index: number) => (
-                    <li key={index}>{prerequisite}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </section>
-        )}
+        {renderPrerequisites()}
         
         <section className="tutorial-content mb-8">
           {/* This is a simplified markdown rendering */}
@@ -129,16 +162,7 @@ const TutorialDetail = () => {
           })}
         </section>
         
-        {tutorial.codeSnippets && Array.isArray(tutorial.codeSnippets) && (tutorial.codeSnippets as Array<{ language: string, code: string }>).length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Code Examples</h2>
-            {(tutorial.codeSnippets as Array<{ language: string, code: string }>).map((snippet: { language: string, code: string }, index: number) => (
-              <div key={index} className="mb-6">
-                <Code language={snippet.language} code={snippet.code} />
-              </div>
-            ))}
-          </section>
-        )}
+        {renderCodeSnippets()}
         
         <footer className="mt-12 pt-6 border-t border-gray-800">
           <div className="flex flex-wrap justify-between items-center">

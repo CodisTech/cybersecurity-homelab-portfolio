@@ -3,6 +3,7 @@ import { formatDate } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tutorial } from "@shared/schema";
+import { ReactNode } from "react";
 
 // Define the expected types for prerequisites and codeSnippets
 type CodeSnippet = {
@@ -27,6 +28,41 @@ const TutorialCard = ({ tutorial, featured = false }: TutorialCardProps) => {
     codeSnippets
   } = tutorial;
 
+  // Helper function to safely render prerequisites
+  const renderPrerequisites = (): ReactNode => {
+    if (!prerequisites || !Array.isArray(prerequisites) || prerequisites.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="bg-background rounded p-4 mb-4">
+        <h4 className="text-md font-medium text-text-primary mb-2">Prerequisites</h4>
+        <ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
+          {(prerequisites as string[]).map((prerequisite: string, index: number) => (
+            <li key={index}>{prerequisite}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  // Helper function to safely render code snippets
+  const renderCodeSnippet = (): ReactNode => {
+    if (!codeSnippets || !Array.isArray(codeSnippets) || codeSnippets.length === 0) {
+      return null;
+    }
+
+    const snippet = codeSnippets[0] as CodeSnippet;
+    return (
+      <>
+        <h4 className="text-md font-medium text-text-primary mb-2">Code Snippet Example:</h4>
+        <div className="code-block mb-4 font-mono text-sm bg-[#1e242c] rounded-md p-4 overflow-x-auto">
+          <pre><code className={`language-${snippet.language}`}>{snippet.code}</code></pre>
+        </div>
+      </>
+    );
+  };
+
   if (featured) {
     return (
       <Card className="bg-surface rounded-lg shadow-lg overflow-hidden border border-gray-800 mb-6">
@@ -38,25 +74,8 @@ const TutorialCard = ({ tutorial, featured = false }: TutorialCardProps) => {
           
           <p className="text-text-secondary mb-4">{summary}</p>
           
-          {prerequisites && Array.isArray(prerequisites) && (prerequisites as string[]).length > 0 && (
-            <div className="bg-background rounded p-4 mb-4">
-              <h4 className="text-md font-medium text-text-primary mb-2">Prerequisites</h4>
-              <ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
-                {(prerequisites as string[]).map((prerequisite: string, index: number) => (
-                  <li key={index}>{prerequisite}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          {codeSnippets && Array.isArray(codeSnippets) && (codeSnippets as CodeSnippet[]).length > 0 && (
-            <>
-              <h4 className="text-md font-medium text-text-primary mb-2">Code Snippet Example:</h4>
-              <div className="code-block mb-4 font-mono text-sm bg-[#1e242c] rounded-md p-4 overflow-x-auto">
-                <pre><code className={`language-${(codeSnippets[0] as CodeSnippet).language}`}>{(codeSnippets[0] as CodeSnippet).code}</code></pre>
-              </div>
-            </>
-          )}
+          {renderPrerequisites()}
+          {renderCodeSnippet()}
           
           <div className="flex justify-between items-center">
             <div className="flex items-center text-sm text-text-secondary">

@@ -19,6 +19,11 @@ A dynamic cybersecurity homelab portfolio and learning platform that provides in
 - **State Management**: React Context API and TanStack Query
 - **Routing**: Wouter
 - **Backend**: Express.js
+- **Deployment**: GitHub Pages
+
+## Live Demo
+
+Visit the live version of this portfolio at [https://username.github.io/cybersecurity-homelab-portfolio](https://username.github.io/cybersecurity-homelab-portfolio) (replace 'username' with your GitHub username).
 
 ## Getting Started
 
@@ -46,6 +51,23 @@ A dynamic cybersecurity homelab portfolio and learning platform that provides in
    ```
 
 4. Open your browser and navigate to `http://localhost:5000`
+
+### Deployment
+
+This project is configured to deploy automatically to GitHub Pages using GitHub Actions.
+
+1. Fork or push this repository to your GitHub account.
+
+2. Go to your repository's Settings > Pages.
+
+3. Under "Build and deployment", select "GitHub Actions" as the source.
+
+4. The site will be deployed automatically when you push to the `main` branch or when you manually trigger the workflow from the Actions tab.
+
+5. If you want to use a custom domain:
+   - Add your domain to the `client/public/CNAME` file
+   - Configure your DNS settings to point to GitHub Pages
+   - Enable the custom domain in your repository's Settings > Pages
 
 ## Project Structure
 
