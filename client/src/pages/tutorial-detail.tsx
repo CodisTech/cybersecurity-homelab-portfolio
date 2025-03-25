@@ -99,13 +99,13 @@ const TutorialDetail = () => {
           <p className="text-lg text-text-secondary">{tutorial.summary}</p>
         </header>
         
-        {tutorial.prerequisites && Array.isArray(tutorial.prerequisites) && tutorial.prerequisites.length > 0 && (
+        {tutorial.prerequisites && Array.isArray(tutorial.prerequisites) && (tutorial.prerequisites as string[]).length > 0 && (
           <section className="mb-8">
             <Card className="bg-background border border-gray-800">
               <CardContent className="p-6">
                 <h2 className="text-xl font-bold mb-4">Prerequisites</h2>
                 <ul className="list-disc pl-5 space-y-2">
-                  {tutorial.prerequisites.map((prerequisite: string, index: number) => (
+                  {(tutorial.prerequisites as string[]).map((prerequisite: string, index: number) => (
                     <li key={index}>{prerequisite}</li>
                   ))}
                 </ul>
@@ -129,10 +129,10 @@ const TutorialDetail = () => {
           })}
         </section>
         
-        {tutorial.codeSnippets && Array.isArray(tutorial.codeSnippets) && tutorial.codeSnippets.length > 0 && (
+        {tutorial.codeSnippets && Array.isArray(tutorial.codeSnippets) && (tutorial.codeSnippets as Array<{ language: string, code: string }>).length > 0 && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Code Examples</h2>
-            {tutorial.codeSnippets.map((snippet: { language: string, code: string }, index: number) => (
+            {(tutorial.codeSnippets as Array<{ language: string, code: string }>).map((snippet: { language: string, code: string }, index: number) => (
               <div key={index} className="mb-6">
                 <Code language={snippet.language} code={snippet.code} />
               </div>

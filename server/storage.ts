@@ -403,6 +403,11 @@ export class MemStorage implements IStorage {
     const newTutorial: Tutorial = { 
       ...tutorial, 
       id, 
+      prerequisites: tutorial.prerequisites || null,
+      codeSnippets: tutorial.codeSnippets || null,
+      tags: tutorial.tags || null,
+      readTime: tutorial.readTime || null,
+      featured: tutorial.featured || null,
       createdAt: new Date() 
     };
     this.tutorials.set(id, newTutorial);

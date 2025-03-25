@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Code } from "@/components/ui/code";
 
 const Documentation = () => {
-  const { data: documents, isLoading } = useQuery({
+  const { data: documents = [], isLoading } = useQuery<Document[]>({
     queryKey: ['/api/documents'],
   });
 
