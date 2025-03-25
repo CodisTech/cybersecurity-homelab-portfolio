@@ -51,7 +51,7 @@ const TutorialDetail = () => {
               Sorry, the tutorial you're looking for doesn't exist or has been moved.
             </p>
             <Link href="/tutorials">
-              <a className="text-primary hover:underline">Return to Tutorials</a>
+              <div className="text-primary hover:underline cursor-pointer">Return to Tutorials</div>
             </Link>
           </div>
         </CardContent>
@@ -150,9 +150,9 @@ const TutorialDetail = () => {
             </div>
             
             <Link href="/tutorials">
-              <a className="text-primary hover:underline mt-4 md:mt-0">
+              <div className="text-primary hover:underline mt-4 md:mt-0 cursor-pointer">
                 <i className="fas fa-arrow-left mr-1"></i> Back to Tutorials
-              </a>
+              </div>
             </Link>
           </div>
         </footer>

@@ -60,7 +60,7 @@ const ServiceCard = ({ service }: ServiceCardProps) => {
       <CardFooter className="p-4 bg-background flex justify-between">
         {configLink && (
           <Link href={configLink}>
-            <a className="text-xs text-primary hover:underline">Configuration Guide</a>
+            <div className="text-xs text-primary hover:underline cursor-pointer">Configuration Guide</div>
           </Link>
         )}
         {adminLink && (
