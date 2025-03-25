@@ -116,7 +116,7 @@ const Header = () => {
                   className="p-2 hover:bg-gray-800 rounded-md cursor-pointer"
                   onClick={() => {
                     closeSearch();
-                    window.location.href = `/documentation#${doc.slug}`;
+                    window.location.assign(`/documentation#${doc.slug}`);
                   }}
                 >
                   <h4 className="font-medium text-primary">{doc.title}</h4>
@@ -131,7 +131,7 @@ const Header = () => {
                   className="p-2 hover:bg-gray-800 rounded-md cursor-pointer"
                   onClick={() => {
                     closeSearch();
-                    window.location.href = `/tutorials/${tutorial.slug}`;
+                    window.location.assign(`/tutorials/${tutorial.slug}`);
                   }}
                 >
                   <h4 className="font-medium text-primary">{tutorial.title}</h4>
@@ -144,7 +144,7 @@ const Header = () => {
                   className="p-2 hover:bg-gray-800 rounded-md cursor-pointer"
                   onClick={() => {
                     closeSearch();
-                    window.location.href = `/services#${service.name.toLowerCase().replace(/\s+/g, '-')}`;
+                    window.location.assign(`/services#${service.name.toLowerCase().replace(/\s+/g, '-')}`);
                   }}
                 >
                   <h4 className="font-medium text-primary">{service.name}</h4>

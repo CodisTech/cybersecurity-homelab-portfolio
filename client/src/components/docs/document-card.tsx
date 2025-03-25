@@ -28,7 +28,7 @@ const DocumentCard = ({ category, icon, documents }: DocumentCardProps) => {
               <li key={doc.id} className="flex items-center">
                 <i className="fas fa-file-alt text-xs mr-2 text-gray-500"></i>
                 <Link href={`/documentation#${doc.slug}`}>
-                  <a className="text-primary hover:underline">{doc.title}</a>
+                  <span className="text-primary hover:underline cursor-pointer">{doc.title}</span>
                 </Link>
               </li>
             ))}
