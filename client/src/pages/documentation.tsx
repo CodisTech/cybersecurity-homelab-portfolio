@@ -28,13 +28,35 @@ const Documentation = () => {
       setCategories(grouped);
       
       // Check URL hash for specific document
-      const hash = window.location.hash.substring(1);
-      if (hash) {
-        const doc = documents.find((d: Document) => d.slug === hash);
-        if (doc) {
-          setActiveDocument(doc);
+      const checkHash = () => {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+          const doc = documents.find((d: Document) => d.slug === hash);
+          if (doc) {
+            setActiveDocument(doc);
+            // Scroll to the document section
+            setTimeout(() => {
+              const element = document.getElementById(hash);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 100);
+          }
+        } else {
+          setActiveDocument(null);
         }
-      }
+      };
+      
+      // Check hash on load
+      checkHash();
+      
+      // Add event listener for hash changes
+      window.addEventListener('hashchange', checkHash);
+      
+      // Clean up event listener
+      return () => {
+        window.removeEventListener('hashchange', checkHash);
+      };
     }
   }, [documents]);
 
