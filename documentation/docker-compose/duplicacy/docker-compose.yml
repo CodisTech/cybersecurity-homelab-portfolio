@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  duplicacy:
+    image: saspus/duplicacy-web:latest
+    container_name: duplicacy
+    environment:
+      - PUID=1000  # Change to your user ID
+      - PGID=1000  # Change to your group ID
+      - TZ=UTC
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # For backing up Docker volumes
+      - /path/to/backups:/backups  # Local backup destination
+      # Mount Docker volumes you want to back up
+      - traefik_data:/source/traefik:ro
+      - grafana_data:/source/grafana:ro
+      - prometheus_data:/source/prometheus:ro
+      - authelia_data:/source/authelia:ro
+      - pihole_etc:/source/pihole_etc:ro
+    restart: unless-stopped
+    ports:
+      - "3875:3875"  # Web UI port
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.duplicacy.rule=Host(`backup.yourdomain.com`)"
+      - "traefik.http.routers.duplicacy.entrypoints=websecure"
+      - "traefik.http.routers.duplicacy.tls=true"
+      - "traefik.http.routers.duplicacy.tls.certresolver=letsencrypt"
+      - "traefik.http.services.duplicacy.loadbalancer.server.port=3875"
+      - "traefik.http.routers.duplicacy.middlewares=authelia@docker"  # Optional: Add Authelia authentication
+
+networks:
+  proxy:
+    external: true
+
+# These volume references assume they've been created by other Docker services
+# If they don't exist, you'll need to create external volume references
+volumes:
+  traefik_data:
+    external: true
+  grafana_data:
+    external: true
+  prometheus_data:
+    external: true
+  authelia_data:
+    external: true
+  pihole_etc:
+    external: true

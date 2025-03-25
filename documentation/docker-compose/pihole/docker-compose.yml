@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    hostname: pihole
+    domainname: yourdomain.com
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"  # Only needed if using Pi-hole as DHCP server
+      - "8080:80/tcp"  # Web interface (remap to avoid conflicts)
+    environment:
+      TZ: 'America/New_York'  # Change to your timezone
+      WEBPASSWORD: 'changeme'  # Set a secure password
+      FTLCONF_LOCAL_IPV4: '192.168.1.10'  # Replace with your Pi-hole's IP
+      ServerIP: '192.168.1.10'  # Replace with your Pi-hole's IP
+      DNS1: '1.1.1.1'  # Primary upstream DNS
+      DNS2: '1.0.0.1'  # Secondary upstream DNS
+      # Uncomment below if you want to use Unbound as local DNS resolver
+      # DNS1: '127.0.0.1#5335'
+      # DNS2: 'no'
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    restart: unless-stopped
+    networks:
+      proxy:
+      dns_net:
+        ipv4_address: 172.20.0.2  # Static IP within Docker network
+    cap_add:
+      - NET_ADMIN  # Required for DHCP
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.yourdomain.com`)"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+      - "traefik.http.routers.pihole.tls=true"
+      - "traefik.http.routers.pihole.tls.certresolver=letsencrypt"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      - "traefik.http.routers.pihole.middlewares=authelia@docker"  # Optional: Add Authelia authentication
+    
+  # Optional: Add Unbound as a recursive DNS resolver
+  unbound:
+    image: mvance/unbound:latest
+    container_name: unbound
+    restart: unless-stopped
+    networks:
+      dns_net:
+        ipv4_address: 172.20.0.3
+    volumes:
+      - './unbound:/opt/unbound/etc/unbound/custom.conf.d'
+    labels:
+      - "traefik.enable=false"
+
+networks:
+  proxy:
+    external: true
+  dns_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

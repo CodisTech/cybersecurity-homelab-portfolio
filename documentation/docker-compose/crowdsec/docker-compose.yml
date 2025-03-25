@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      - GID=1000  # Use your host GID here
+      - UID=1000  # Use your host UID here
+      - COLLECTIONS=crowdsecurity/linux crowdsecurity/traefik crowdsecurity/nginx crowdsecurity/http-cve
+    volumes:
+      - ./config:/etc/crowdsec
+      - ./data:/var/lib/crowdsec/data
+      - /var/log:/var/log:ro  # Mount host logs (read-only)
+      - ./acquis.yaml:/etc/crowdsec/acquis.yaml
+    restart: unless-stopped
+    networks:
+      - proxy
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "traefik.enable=false"
+
+  crowdsec-traefik-bouncer:
+    image: fbonalair/traefik-crowdsec-bouncer:latest
+    container_name: crowdsec-traefik-bouncer
+    environment:
+      - CROWDSEC_BOUNCER_API_KEY=${BOUNCER_API_KEY:-changeme}  # Set API key via .env file
+      - CROWDSEC_AGENT_HOST=crowdsec:8080
+      - MODE=ban   # or ban|sanitize depending on your preference
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    depends_on:
+      - crowdsec
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=false"
+
+  crowdsec-dashboard:
+    image: crowdsecurity/metabase:latest
+    container_name: crowdsec-dashboard
+    environment:
+      - MB_DB_FILE=/metabase-data/metabase.db
+      - MGID=1000  # Use your host GID here
+      - MUID=1000  # Use your host UID here
+    volumes:
+      - ./metabase-data:/metabase-data
+    restart: unless-stopped
+    networks:
+      - proxy
+    depends_on:
+      - crowdsec
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.crowdsec-dashboard.rule=Host(`crowdsec.yourdomain.com`)"
+      - "traefik.http.routers.crowdsec-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.crowdsec-dashboard.tls=true"
+      - "traefik.http.routers.crowdsec-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.services.crowdsec-dashboard.loadbalancer.server.port=3000"
+      - "traefik.http.routers.crowdsec-dashboard.middlewares=authelia@docker"  # Optional: Add Authelia authentication
+
+  # Optional: CAPI (Community API) registration service
+  # cscli-capi:
+  #   image: crowdsecurity/cscli-capi:latest
+  #   container_name: cscli-capi
+  #   environment:
+  #     - CONFIG_PATH=/etc/crowdsec/console.yaml
+  #   volumes:
+  #     - ./config:/etc/crowdsec:ro
+  #   restart: on-failure
+  #   networks:
+  #     - proxy
+  #   depends_on:
+  #     - crowdsec
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,25 @@
+###############################################################################
+#                         Users Database Configuration                       #
+###############################################################################
+
+# This file should be secured and only accessible by Authelia
+# For production use, generate password hashes using Authelia's CLI:
+# docker run authelia/authelia:latest authelia crypto hash generate argon2 --password 'yourpassword'
+
+users:
+  admin:
+    displayname: "Administrator"
+    # Password is 'password' - CHANGE THIS IMMEDIATELY
+    password: "$argon2id$v=19$m=65536,t=3,p=4$UG9pbnRsZXNzUGFzc3dvcmQ$WPWNZFly1Xu8X0k1ByQqWnJkH5LGF/oZozt5Vxcs0JA"
+    email: admin@yourdomain.com
+    groups:
+      - admins
+      - users
+
+  john:
+    displayname: "John Doe"
+    # Password is 'password' - CHANGE THIS IMMEDIATELY 
+    password: "$argon2id$v=19$m=65536,t=3,p=4$UG9pbnRsZXNzUGFzc3dvcmQ$WPWNZFly1Xu8X0k1ByQqWnJkH5LGF/oZozt5Vxcs0JA"
+    email: john@yourdomain.com
+    groups:
+      - users

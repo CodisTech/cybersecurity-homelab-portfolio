@@ -1,0 +1,40 @@
+# CrowdSec Acquisition Configuration
+
+# This file defines the logs CrowdSec will process
+# Format documentation: https://docs.crowdsec.net/docs/next/data_sources/intro
+
+---
+# Monitoring Docker logs via journald
+filenames:
+  - /var/log/syslog
+  - /var/log/auth.log
+labels:
+  type: syslog
+
+---
+# Monitoring Traefik access logs (example - adjust path to match your setup)
+filenames:
+  - /var/log/traefik/access.log
+labels:
+  type: traefik
+
+---
+# Monitoring Nginx access logs (example - adjust path to match your setup)
+filenames:
+  - /var/log/nginx/access.log
+labels:
+  type: nginx
+  
+---
+# Monitoring SSH logs
+filenames:
+  - /var/log/auth.log
+labels:
+  type: sshd
+
+---
+# Monitoring Docker events through systemd
+# Uncomment once you've set up journald forwarding for docker
+# journalctl_filter: "CONTAINER_NAME=docker"
+# labels:
+#   type: docker
