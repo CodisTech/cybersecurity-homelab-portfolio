@@ -1,6 +1,6 @@
-# Cybersecurity Homelab Portfolio
+# Cybersecurity Homelab Portfolio Website
 
-A dynamic cybersecurity homelab portfolio and learning platform that provides interactive, user-friendly documentation and tutorials for cybersecurity enthusiasts and professionals.
+A dynamic web application to showcase my cybersecurity homelab, providing interactive documentation and tutorials for cybersecurity enthusiasts and professionals. This portfolio website serves as the frontend to my [cybersecurity-homelab](https://github.com/CodisTech/cybersecurity-homelab) project.
 
 ## Features
 
@@ -29,8 +29,8 @@ A dynamic cybersecurity homelab portfolio and learning platform that provides in
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/cybersecurity-homelab.git
-   cd cybersecurity-homelab
+   git clone https://github.com/yourusername/cybersecurity-homelab-portfolio.git
+   cd cybersecurity-homelab-portfolio
    ```
 
 2. Install dependencies
