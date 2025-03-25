@@ -1,26 +1,24 @@
 global:
   scrape_interval: 15s
+  scrape_timeout: 10s
   evaluation_interval: 15s
 
-# Alertmanager configuration
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
           # - alertmanager:9093
 
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
   # - "first_rules.yml"
   # - "second_rules.yml"
 
-# A scrape configuration containing exactly one endpoint to scrape:
 scrape_configs:
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
 
-  - job_name: "node-exporter"
+  - job_name: "node_exporter"
     static_configs:
       - targets: ["node-exporter:9100"]
 
@@ -28,20 +26,57 @@ scrape_configs:
     static_configs:
       - targets: ["cadvisor:8080"]
 
-  # Example job for monitoring Docker Host
+  - job_name: "traefik"
+    static_configs:
+      - targets: ["traefik:8082"]  # Assuming Traefik metrics are exposed on port 8082
+
+  - job_name: "pihole"
+    static_configs:
+      - targets: ["pihole:9617"]  # Requires pihole-exporter running on the Pi-hole host
+    metrics_path: /metrics
+
+  - job_name: "crowdsec"
+    static_configs:
+      - targets: ["crowdsec:6060"]  # CrowdSec metrics endpoint
+    metrics_path: /metrics
+
   - job_name: "docker"
     static_configs:
       - targets: ["cadvisor:8080"]
 
-  # Pi-hole monitoring (if available)
-  - job_name: "pihole"
-    scrape_interval: 60s
-    static_configs:
-      - targets: ["pihole:9617"]
+  # Add the following if you have a UPS with NUT installed
+  # - job_name: "nut_exporter"
+  #   static_configs:
+  #     - targets: ["nut-exporter:9199"]
 
-  # Traefik monitoring (if available)
-  - job_name: "traefik"
-    static_configs:
-      - targets: ["traefik:8082"]
-    
-  # Add more targets as needed for your homelab services
+  # Add the following if you have a smart home setup (HomeAssistant)
+  # - job_name: "homeassistant"
+  #   metrics_path: /api/prometheus
+  #   bearer_token: your_long_lived_access_token
+  #   scheme: https
+  #   static_configs:
+  #     - targets: ["homeassistant.yourdomain.com"]
+
+  # Add the following if you have pfSense with node_exporter installed
+  # - job_name: "pfsense"
+  #   static_configs:
+  #     - targets: ["192.168.1.1:9100"]  # Replace with your pfSense IP address
+  #   metrics_path: /metrics
+
+  # Example of a blackbox_exporter job for checking website health
+  # - job_name: 'blackbox'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response
+  #   static_configs:
+  #     - targets:
+  #       - https://yourdomain.com
+  #       - https://service1.yourdomain.com
+  #       - https://service2.yourdomain.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: blackbox-exporter:9115  # The blackbox exporter's real address

@@ -1,86 +1,170 @@
-# Authelia Single Sign-On Setup
+# Authelia SSO Implementation
 
-This directory contains the necessary configuration files to deploy Authelia SSO with Redis for session management.
+This directory contains a complete Docker Compose setup for deploying Authelia as a Single Sign-On (SSO) solution for your homelab services.
+
+## Overview
+
+Authelia is an open-source authentication and authorization server that provides:
+
+- Web portal for centralized authentication
+- Two-factor authentication (TOTP and WebAuthn/security keys)
+- Fine-grained access control based on user groups
+- Integration with Traefik reverse proxy
+- Session management and persistence
+
+## Files in this Directory
+
+- `docker-compose.yml`: Container configuration for Authelia and Redis
+- `config/configuration.yml`: Main Authelia configuration
+- `config/users_database.yml`: User definitions and access controls
 
 ## Prerequisites
 
+Before deploying, you'll need:
+
 - Docker and docker-compose installed
-- A reverse proxy (like Traefik, Nginx, or Caddy) for HTTPS termination
-- Domain name with proper DNS configuration
+- Traefik reverse proxy configured
+- DNS records for your Authelia domain (e.g., `auth.yourdomain.com`)
+- SMTP server for password reset and notifications (optional)
 
-## Configuration
+## Installation
 
-Before deploying, update the following files:
+1. Clone this repository or download the files to your server
 
-1. In `config/configuration.yml`:
-   - Replace `yourdomain.com` with your actual domain
-   - Adjust access control rules to match your services
-   - For production, configure a proper notification method (SMTP recommended)
+2. Create required directories:
+   ```bash
+   mkdir -p config redis
+   ```
 
-2. In `config/users_database.yml`:
-   - Change the default passwords
-   - Add your users
-   - Generate secure password hashes using:
-     ```
-     docker run authelia/authelia:latest authelia crypto hash generate argon2 --password 'yourpassword'
-     ```
+3. Modify configuration files:
+   - Update domains in `config/configuration.yml`
+   - Change default passwords in `config/users_database.yml`
+   - Set secure passwords for JWT and session secrets in `docker-compose.yml`
 
-3. In `docker-compose.yml`:
-   - Replace `auth.yourdomain.com` with your Authelia subdomain
-   - Set a secure Redis password using environment variables or .env file
+4. Deploy the stack:
+   ```bash
+   docker-compose up -d
+   ```
 
-## Deployment
+5. Access the portal at https://auth.yourdomain.com
 
+## Default Credentials
+
+> **Important:** Change these credentials before deploying to production!
+
+- Admin User:
+  - Username: `admin`
+  - Password: `homelab`
+  - Groups: `admins`, `users`
+
+- Regular User:
+  - Username: `user`
+  - Password: `password`
+  - Groups: `users`
+
+## Security Configuration
+
+### Generating Secure Passwords
+
+For user passwords:
 ```bash
-# Create empty data directories
-mkdir -p data redis
-
-# Set Redis password
-export REDIS_PASSWORD="your-secure-password"
-
-# Deploy
-docker-compose up -d
+docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password 'YourPassword'
 ```
 
-## Integration with Reverse Proxy
+For JWT and session secrets:
+```bash
+openssl rand -hex 64
+```
 
-### For Traefik
+### Redis Password
 
-Authelia is already configured to work with Traefik in the docker-compose.yml file.
+Change the Redis password in both:
+- `docker-compose.yml` (redis command line)
+- `config/configuration.yml` (redis section)
 
-For protected services, add the following labels:
+## Traefik Integration
 
+Authelia integrates with Traefik using the ForwardAuth middleware, which is automatically configured in the `docker-compose.yml` file.
+
+To protect a service with Authelia, add this label to your service:
 ```yaml
-labels:
-  - "traefik.http.middlewares.authelia.forwardAuth.address=http://authelia:9091/api/verify?rd=https://auth.yourdomain.com"
-  - "traefik.http.middlewares.authelia.forwardAuth.trustForwardHeader=true"
-  - "traefik.http.middlewares.authelia.forwardAuth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
-  - "traefik.http.routers.yourservice.middlewares=authelia@docker"
+- "traefik.http.routers.your-service.middlewares=authelia@docker"
 ```
 
-### For Nginx Proxy Manager
+For more complex setups, refer to the [Authelia-Traefik Integration Guide](../../authelia/authelia-sso-integration-guide.md).
 
-Create a forward auth entry:
-- Name: Authelia
-- Forward Hostname/IP: authelia
-- Port: 9091
-- Forward Path: /api/verify?rd=https://auth.yourdomain.com
+## Multi-factor Authentication
 
-Then enable forward authentication in proxy hosts advanced settings.
+### TOTP Setup
 
-## Security Considerations
+Users can enable TOTP (app-based) authentication by:
+1. Logging into Authelia
+2. Going to the "2FA" section
+3. Scanning the QR code with an authenticator app
 
-- Keep your user database secure
-- Use strong passwords for Redis and user accounts
-- Enable HTTPS for all services
-- Consider setting up email notifications for login attempts
-- Review the [security hardening guides](../../security/) for additional measures
+### WebAuthn (Security Keys)
+
+Users can register security keys (like YubiKey) by:
+1. Logging into Authelia
+2. Going to the "Security Keys" section
+3. Following the prompts to register their security key
+
+## Advanced Configuration
+
+### External Database
+
+For production deployments, consider using an external database instead of SQLite:
+
+1. Uncomment and configure the MySQL section in `configuration.yml`
+2. Create the database and user in MySQL/MariaDB
+
+### LDAP Integration
+
+For enterprise deployments, Authelia can integrate with existing LDAP directories:
+
+1. Uncomment and configure the LDAP section in `configuration.yml`
+2. Update the authentication backend to use LDAP instead of file
 
 ## Troubleshooting
 
-If you encounter issues:
+Common issues and solutions:
 
-1. Check logs with `docker-compose logs -f authelia`
-2. Verify that Redis is running properly
-3. Check that your reverse proxy is correctly configured
-4. Ensure DNS records are set up correctly for your domain
+1. **Authentication Loop**: 
+   - Check cookie domain in configuration.yml
+   - Ensure consistent domain names across configuration
+
+2. **Redirect Issues**: 
+   - Verify default_redirection_url is set correctly
+   - Check for misconfigured Traefik labels
+
+3. **Session Problems**: 
+   - Verify Redis connectivity
+   - Check session domain configuration
+   - Ensure secure cookies are enabled for HTTPS
+
+For more information, refer to the [official Authelia documentation](https://www.authelia.com/docs/).
+
+## Maintenance
+
+### Backing Up
+
+Important files to back up:
+- `config/configuration.yml`
+- `config/users_database.yml`
+- `config/db.sqlite3` (if using SQLite)
+
+### Updating
+
+To update Authelia:
+
+1. Update the image version:
+   ```bash
+   docker-compose pull
+   ```
+
+2. Restart the containers:
+   ```bash
+   docker-compose up -d
+   ```
+
+Always check the [changelog](https://github.com/authelia/authelia/releases) before updating.

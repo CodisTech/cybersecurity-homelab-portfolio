@@ -1,36 +1,42 @@
-version: '3.8'
+version: '3'
 
 services:
   pihole:
-    image: pihole/pihole:latest
     container_name: pihole
-    hostname: pihole
-    domainname: yourdomain.com
+    image: pihole/pihole:latest
+    # For DHCP it's recommended to remove these ports and instead add: network_mode: "host"
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "67:67/udp"  # Only needed if using Pi-hole as DHCP server
-      - "8080:80/tcp"  # Web interface (remap to avoid conflicts)
+      - "67:67/udp"  # Only required if using Pi-hole as your DHCP server
+      - "8080:80/tcp"  # The web interface port (changed from default 80)
     environment:
       TZ: 'America/New_York'  # Change to your timezone
-      WEBPASSWORD: 'changeme'  # Set a secure password
-      FTLCONF_LOCAL_IPV4: '192.168.1.10'  # Replace with your Pi-hole's IP
-      ServerIP: '192.168.1.10'  # Replace with your Pi-hole's IP
-      DNS1: '1.1.1.1'  # Primary upstream DNS
-      DNS2: '1.0.0.1'  # Secondary upstream DNS
-      # Uncomment below if you want to use Unbound as local DNS resolver
-      # DNS1: '127.0.0.1#5335'
-      # DNS2: 'no'
+      WEBPASSWORD: 'securepassword'  # Change this to a secure password
+      SERVERIP: '192.168.1.10'  # Your server's IP address
+      # WEBTHEME: 'default-dark'  # Optional: set the theme (default-dark or default-light)
+      # DHCP_ACTIVE: 'true'  # Enable if using Pi-hole as DHCP server
+      # DHCP_START: '192.168.1.100'  # Start of DHCP range
+      # DHCP_END: '192.168.1.200'  # End of DHCP range
+      # DHCP_ROUTER: '192.168.1.1'  # Your router's IP address
+      # DHCP_LEASETIME: '24'  # Lease time in hours
+      # DNS1: '127.0.0.1'  # Primary upstream DNS server
+      # DNS2: '1.1.1.1'  # Secondary upstream DNS server
+      # DNSSEC: 'true'  # Enable DNSSEC
+      # TEMPERATUREUNIT: 'c'  # c or f
+      # REV_SERVER: 'true'  # Enable reverse DNS
+      # REV_SERVER_DOMAIN: 'local'  # Local domain name
+      # REV_SERVER_TARGET: '192.168.1.1'  # IP of your DNS server
+      # REV_SERVER_CIDR: '192.168.0.0/16'  # CIDR of your local network
     volumes:
       - './etc-pihole:/etc/pihole'
       - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    # Recommended but not required (DHCP needs NET_ADMIN)
+    cap_add:
+      - NET_ADMIN
     restart: unless-stopped
     networks:
-      proxy:
-      dns_net:
-        ipv4_address: 172.20.0.2  # Static IP within Docker network
-    cap_add:
-      - NET_ADMIN  # Required for DHCP
+      - proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pihole.rule=Host(`pihole.yourdomain.com`)"
@@ -38,26 +44,9 @@ services:
       - "traefik.http.routers.pihole.tls=true"
       - "traefik.http.routers.pihole.tls.certresolver=letsencrypt"
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
-      - "traefik.http.routers.pihole.middlewares=authelia@docker"  # Optional: Add Authelia authentication
-    
-  # Optional: Add Unbound as a recursive DNS resolver
-  unbound:
-    image: mvance/unbound:latest
-    container_name: unbound
-    restart: unless-stopped
-    networks:
-      dns_net:
-        ipv4_address: 172.20.0.3
-    volumes:
-      - './unbound:/opt/unbound/etc/unbound/custom.conf.d'
-    labels:
-      - "traefik.enable=false"
+      # Optional: Add authentication
+      - "traefik.http.routers.pihole.middlewares=authelia@docker"
 
 networks:
   proxy:
     external: true
-  dns_net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24

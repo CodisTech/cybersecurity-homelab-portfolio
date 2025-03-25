@@ -1,125 +1,197 @@
-# Pi-hole DNS Filtering Setup
+# Pi-hole DNS and Ad Blocking Setup
 
-This directory contains the configuration files to deploy Pi-hole with optional Unbound as a recursive DNS resolver.
+This directory contains configuration files for deploying Pi-hole as a network-wide ad blocker and DNS server in your homelab.
 
 ## Overview
 
-Pi-hole provides network-wide ad blocking and DNS filtering for your homelab. This setup includes:
+Pi-hole is a DNS sinkhole that blocks unwanted content, primarily advertisements, by preventing DNS resolution to known ad-serving domains. It provides:
 
-1. Pi-hole DNS server and web admin interface
-2. Optional Unbound recursive DNS resolver for enhanced privacy
-3. Integration with Traefik reverse proxy
-4. Optional Authelia authentication
+- Network-wide ad blocking
+- Local DNS resolution
+- Optional DHCP server
+- Detailed statistics and monitoring
+- Customizable blocklists
+
+## Configuration Files
+
+- `docker-compose.yml`: Container configuration for Pi-hole
+- `etc-pihole`: Will be created automatically for Pi-hole configuration
+- `etc-dnsmasq.d`: Will be created automatically for DNS configuration
 
 ## Prerequisites
 
+Before deploying Pi-hole, you'll need:
+
 - Docker and docker-compose installed
-- A designated static IP on your network for Pi-hole
-- Properly configured firewall to allow DNS traffic
-- Optional: Traefik reverse proxy for web interface access
+- A dedicated IP address for your Pi-hole server
+- Router access to change DHCP settings (optional)
+- Traefik reverse proxy (optional, for web interface access)
 
-## Configuration
+## Installation
 
-Before deploying, update the following in `docker-compose.yml`:
-
-1. Replace `yourdomain.com` with your actual domain name
-2. Set a secure `WEBPASSWORD` (or use environment variables)
-3. Update `FTLCONF_LOCAL_IPV4` and `ServerIP` with your Pi-hole's IP address
-4. Change time zone to match your location
-5. Adjust DNS1 and DNS2 to your preferred upstream DNS providers
-6. If using Unbound, uncomment the relevant DNS settings
-
-## Custom Configuration Files
-
-You may want to create the following additional configuration files:
-
-1. For custom DNS entries:
+1. Create required directories:
    ```bash
-   mkdir -p etc-dnsmasq.d
-   cat > etc-dnsmasq.d/02-custom.conf << EOF
-   # Custom DNS entries
-   address=/internal.yourdomain.com/192.168.1.100
-   EOF
+   mkdir -p etc-pihole etc-dnsmasq.d
    ```
 
-2. For adlists:
+2. Modify the `docker-compose.yml` file:
+   - Update the timezone to your local timezone
+   - Set a secure admin password
+   - Configure your server's IP address
+   - Uncomment and adjust DHCP settings if using Pi-hole as a DHCP server
+   - Customize upstream DNS servers if needed
+
+3. Deploy Pi-hole:
    ```bash
-   mkdir -p etc-pihole
-   cat > etc-pihole/adlists.list << EOF
-   https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-   https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
-   https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
-   EOF
+   docker-compose up -d
    ```
 
-## Deployment
+4. Access the web interface at http://your-server-ip:8080/admin or https://pihole.yourdomain.com
 
-```bash
-# Create required directories
-mkdir -p etc-pihole etc-dnsmasq.d unbound
+## Network Configuration
 
-# Deploy
-docker-compose up -d
-```
+### Using Pi-hole as DNS Server
 
-## Accessing Pi-hole
+To utilize Pi-hole throughout your network, you have two options:
 
-- Web interface: https://pihole.yourdomain.com (or http://your-pihole-ip:8080)
-- Default login: Set in the WEBPASSWORD environment variable
-- API token: Generated in the web interface (Settings > API)
+1. **Configure Your Router (Recommended)**:
+   - Access your router's admin interface
+   - Set Pi-hole as the primary DNS server
+   - All devices on your network will automatically use Pi-hole
 
-## Using Pi-hole in Your Network
+2. **Configure Individual Devices**:
+   - Manually set each device's DNS server to the Pi-hole IP address
+   - Use DHCP reservations for important devices
 
-### As Primary DNS
+### Using Pi-hole as DHCP Server
 
-Configure your router's DHCP to use Pi-hole as the primary DNS server:
-- DNS Server: 192.168.1.10 (your Pi-hole IP)
+If you want Pi-hole to function as your network's DHCP server:
 
-### Manual Configuration
+1. Disable the DHCP server on your router
+2. Enable DHCP in Pi-hole by uncommenting the DHCP settings in `docker-compose.yml`
+3. Configure DHCP range, lease time, and router IP
+4. Restart Pi-hole: `docker-compose restart`
 
-For selective devices, manually set DNS:
-- DNS Server: 192.168.1.10 (your Pi-hole IP)
-- Gateway: Your router's IP (typically 192.168.1.1)
+## Customizing Blocklists
+
+Pi-hole comes with default blocklists, but you can add more:
+
+1. Access the Pi-hole web interface
+2. Go to Group Management > Adlists
+3. Add additional blocklist URLs
+4. Update Gravity: Tools > Update Gravity
+
+Recommended blocklists:
+
+- AdGuard DNS Filter: `https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt`
+- OISD Basic: `https://dbl.oisd.nl/basic/`
+- StevenBlack's Unified Hosts: `https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts`
 
 ## Security Considerations
 
-- Change the default web interface password
-- Use Authelia or another form of authentication for the web interface
-- Regularly update blocklists and Pi-hole itself
-- Consider implementing the [security hardening guides](../../security/)
-- If exposing Pi-hole publicly, use a VPN or strong authentication
+1. **Admin Password**:
+   - Use a strong, unique password for the web interface
+   - Consider using Authelia for additional authentication (configured in docker-compose.yml)
 
-## Troubleshooting
+2. **Network Exposure**:
+   - Only expose the web interface port (8080) to your internal network
+   - Use a reverse proxy with SSL for external access
 
-If you encounter issues:
-
-1. Check logs with `docker-compose logs -f pihole`
-2. Ensure ports 53 (DNS) and 8080 (web) are not blocked
-3. Verify your router is not blocking DNS requests
-4. Test DNS resolution with `nslookup google.com 192.168.1.10`
-5. Firewall may need to be configured to allow TCP/UDP port 53
+3. **Backup Configuration**:
+   - Regularly backup the `etc-pihole` and `etc-dnsmasq.d` directories
+   - Document custom configurations and blocklists
 
 ## Advanced Configuration
 
-### DHCP Setup
+### Custom DNS Records
 
-To use Pi-hole as your DHCP server:
+To add local DNS records:
 
-1. Ensure your router's DHCP server is disabled
-2. In Pi-hole web interface, go to Settings > DHCP and enable DHCP server
-3. Configure IP range, gateway, and lease time
+1. Create a new file in the `etc-dnsmasq.d` directory:
+   ```bash
+   echo 'address=/myserver.local/192.168.1.100' > etc-dnsmasq.d/02-custom.conf
+   ```
 
-### Block Page
+2. Restart Pi-hole:
+   ```bash
+   docker-compose restart
+   ```
 
-To customize the block page:
+### DNS over HTTPS/TLS
+
+For encrypted DNS queries:
+
+1. Deploy Unbound or cloudflared in a separate container
+2. Configure Pi-hole to use this local resolver as its upstream DNS
+3. Update the `DNS1` and `DNS2` environment variables
+
+### Conditional Forwarding
+
+For proper local domain resolution:
+
+1. Access the Pi-hole web interface
+2. Go to Settings > DNS
+3. Under "Conditional Forwarding":
+   - Enter your network information
+   - Enable conditional forwarding
+
+## Monitoring and Maintenance
+
+### Viewing Statistics
+
+Access detailed blocking statistics in the Pi-hole dashboard, including:
+
+- Total queries
+- Queries blocked
+- Top domains
+- Top clients
+- Query types
+
+### Regular Maintenance
+
+1. **Update Blocklists**:
+   - Web interface: Tools > Update Gravity
+   - Or automatically via cron: `docker exec pihole pihole updateGravity`
+
+2. **Update Pi-hole**:
+   ```bash
+   docker-compose pull
+   docker-compose up -d
+   ```
+
+3. **Check Logs**:
+   ```bash
+   docker logs -f pihole
+   ```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **DNS Not Working**:
+   - Check that ports 53 TCP/UDP are not in use by another service
+   - Verify network settings and firewall rules
+   - Ensure your router is properly configured to use Pi-hole
+
+2. **Web Interface Inaccessible**:
+   - Check that the container is running: `docker ps`
+   - Verify port mapping: `docker-compose ps`
+   - Check the logs: `docker logs pihole`
+
+3. **Specific Sites Blocked Incorrectly**:
+   - Add the domain to the whitelist in the Pi-hole admin interface
+   - Check Query Log to identify which blocklist is affecting the site
+
+### Reset Admin Password
+
+If you forget the admin password:
+
 ```bash
-cat > etc-pihole/custom_blocked.html << EOF
-<html>
-<head><title>Website Blocked</title></head>
-<body>
-<h1>Website Blocked</h1>
-<p>This website has been blocked by Pi-hole in accordance with network policy.</p>
-</body>
-</html>
-EOF
+docker exec -it pihole pihole -a -p newpassword
 ```
+
+## Additional Resources
+
+- [Pi-hole Documentation](https://docs.pi-hole.net/)
+- [Pi-hole Discourse](https://discourse.pi-hole.net/)
+- [Pi-hole GitHub](https://github.com/pi-hole/pi-hole)

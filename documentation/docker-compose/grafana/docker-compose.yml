@@ -4,17 +4,21 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
-    user: "472"  # Default Grafana user ID
-    environment:
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-piechart-panel
-      - GF_SECURITY_ADMIN_PASSWORD=changeme  # Change to a secure password
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     volumes:
       - grafana_data:/var/lib/grafana
       - ./provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=securegrafanapassword
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://grafana.yourdomain.com
+      # Optional: Configure Grafana to support authentication via Authelia
+      - GF_AUTH_PROXY_ENABLED=true
+      - GF_AUTH_PROXY_HEADER_NAME=Remote-User
+      - GF_AUTH_PROXY_HEADER_PROPERTY=username
+      - GF_AUTH_PROXY_AUTO_SIGN_UP=true
     restart: unless-stopped
     networks:
+      - monitoring
       - proxy
     depends_on:
       - prometheus
@@ -25,22 +29,25 @@ services:
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-      - "traefik.http.routers.grafana.middlewares=authelia@docker"  # Optional: Add Authelia authentication
+      # Optional: Add authentication with Authelia
+      - "traefik.http.routers.grafana.middlewares=authelia@docker"
 
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=15d'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    volumes:
-      - ./prometheus/:/etc/prometheus/
-      - prometheus_data:/prometheus
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
     restart: unless-stopped
     networks:
+      - monitoring
       - proxy
     labels:
       - "traefik.enable=true"
@@ -49,7 +56,8 @@ services:
       - "traefik.http.routers.prometheus.tls=true"
       - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
-      - "traefik.http.routers.prometheus.middlewares=authelia@docker"  # Optional: Add Authelia authentication
+      # Optional: Add authentication with Authelia
+      - "traefik.http.routers.prometheus.middlewares=authelia@docker"
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -65,9 +73,9 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     restart: unless-stopped
     networks:
-      - proxy
-    labels:
-      - "traefik.enable=false"
+      - monitoring
+    expose:
+      - 9100
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -80,14 +88,40 @@ services:
       - /dev/disk/:/dev/disk:ro
     restart: unless-stopped
     networks:
-      - proxy
-    labels:
-      - "traefik.enable=false"
+      - monitoring
+    expose:
+      - 8080
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    volumes:
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+    expose:
+      - 3100
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log
+      - ./promtail:/etc/promtail
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - monitoring
 
 volumes:
   grafana_data:
   prometheus_data:
+  loki_data:
 
 networks:
+  monitoring:
+    driver: bridge
   proxy:
     external: true

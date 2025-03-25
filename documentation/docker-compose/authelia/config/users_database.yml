@@ -1,25 +1,28 @@
 ###############################################################################
-#                         Users Database Configuration                       #
+#                         Users Database Configuration                         #
 ###############################################################################
 
-# This file should be secured and only accessible by Authelia
-# For production use, generate password hashes using Authelia's CLI:
-# docker run authelia/authelia:latest authelia crypto hash generate argon2 --password 'yourpassword'
+# This file can be used if you do not have an LDAP server.
+# Password hashes can be generated using the following command:
+# docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password 'YourPassword'
 
 users:
   admin:
-    displayname: "Administrator"
-    # Password is 'password' - CHANGE THIS IMMEDIATELY
-    password: "$argon2id$v=19$m=65536,t=3,p=4$UG9pbnRsZXNzUGFzc3dvcmQ$WPWNZFly1Xu8X0k1ByQqWnJkH5LGF/oZozt5Vxcs0JA"
+    displayname: "Homelab Admin"
+    # Password is 'homelab' - Change this in production!
+    password: "$argon2id$v=19$m=65536,t=3,p=4$RmVoUnpIUmg5TzRXZEdiZQ$0B1gjbSe35/VNIR8t0s1JPRvzp8tKlHJXdvZb8YPYl8"
     email: admin@yourdomain.com
     groups:
       - admins
       - users
-
-  john:
-    displayname: "John Doe"
-    # Password is 'password' - CHANGE THIS IMMEDIATELY 
-    password: "$argon2id$v=19$m=65536,t=3,p=4$UG9pbnRsZXNzUGFzc3dvcmQ$WPWNZFly1Xu8X0k1ByQqWnJkH5LGF/oZozt5Vxcs0JA"
-    email: john@yourdomain.com
+  
+  user:
+    displayname: "Regular User"
+    # Password is 'password' - Change this in production!
+    password: "$argon2id$v=19$m=65536,t=3,p=4$QXc5aTFXNHByY0pvOXEyVA$Jw3qxFcb6wF/fTb0n1qWxrEBjHloTbncrZ3sUfPLOo8"
+    email: user@yourdomain.com
     groups:
       - users
+
+# To generate your own passwords:
+# docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password 'YourPassword'
