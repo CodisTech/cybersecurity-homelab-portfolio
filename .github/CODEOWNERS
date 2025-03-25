@@ -1,0 +1,16 @@
+# Default owners for everything in the repo
+* @CodisTech
+
+# Frontend ownership
+/client/ @CodisTech
+/web-app/ @CodisTech
+
+# Backend ownership
+/server/ @CodisTech
+/shared/ @CodisTech
+
+# Documentation ownership
+/docs/ @CodisTech
+README.md @CodisTech
+CONTRIBUTING.md @CodisTech
+LICENSE @CodisTech
